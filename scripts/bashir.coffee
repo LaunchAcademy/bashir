@@ -1,6 +1,6 @@
 module.exports = (robot) ->
-  users = null
 
+  users = null
   robot.router.post '/checkup', (req, res) ->
     res.send {status: 200}
     data = extractData req
