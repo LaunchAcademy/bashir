@@ -1,6 +1,6 @@
 module.exports = (robot) ->
   ehAuthToken = process.env.EH_AUTH_TOKEN
-  surveyReceptorUrl = EH_RESPONSE_ENDPOINT
+  surveyReceptorUrl = process.env.EH_RESPONSE_ENDPOINT
 
   robot.router.post '/checkup', (req, res) ->
     res.send {status: 200}
