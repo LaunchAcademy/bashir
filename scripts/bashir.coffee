@@ -1,6 +1,6 @@
 module.exports = (robot) ->
-  ehAuthToken = "frontier_medicine-aj-dr"
-  surveyReceptorUrl = "http://localhost:3000/api/v1/survey_responses"
+  ehAuthToken = process.env.EH_AUTH_TOKEN
+  surveyReceptorUrl = EH_RESPONSE_ENDPOINT
 
   robot.router.post '/checkup', (req, res) ->
     res.send {status: 200}
