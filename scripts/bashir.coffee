@@ -57,6 +57,7 @@ module.exports = (robot) ->
   saveResponse = (text) ->
     console.log "Saving response..."
     surveyResponse = buildResponse text
+    console.log surveyResponse
     recordSurveyResponse surveyResponse
 
   hasNotBeenContacted = (user) ->
@@ -77,3 +78,5 @@ module.exports = (robot) ->
       .http(surveyReceptorUrl)
       .header('Content-Type', 'application/json')
       .post(surveyResponse) (err, res, body) ->
+        console.log res
+        console.log body
