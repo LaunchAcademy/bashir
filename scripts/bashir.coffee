@@ -43,8 +43,8 @@ module.exports = (robot) ->
     robot.brain.get "surveyId"
 
   robot.hear /[1-9]|10/, (res) ->
-    user = res.message.room
     return null if users().length == 0
+    user = res.message.room
     if hasNotBeenContacted user
       crossNameOff user
       res.send "Thank you for your input!"
@@ -52,8 +52,7 @@ module.exports = (robot) ->
 
   crossNameOff = (user)->
     index = users().indexOf user
-    newUsers = users().splice(index, 1)
-    robot.brain.set "users", newUsers
+    users().splice(index, 1)
 
   saveResponse = (text) ->
     console.log "Saving response..."
