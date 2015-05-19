@@ -1,25 +1,31 @@
 module.exports = (robot) ->
+  ehAuthToken = "frontier_medicine-aj-dr"
+  surveyReceptorUrl = "http://localhost:3000/api/v1/survey_responses"
 
-  users = null
   robot.router.post '/checkup', (req, res) ->
     res.send {status: 200}
     data = extractData req
-    question = "on a scale from 1-10 (10 being the best), how awesome was launch academy this week?"
-    #users = data.users
-    users = ['jarvis']
+
+    robot.brain.set "users", data.users
+    robot.brain.set "question", data.question
+    robot.brain.set "surveyId", data.survey_id
+
+    deliverMessages()
+
+  deliverMessages = ->
     step = 0
     interval = setInterval ->
-      user = users[step]
+      user = users()[step]
       step++
       if user == undefined
         clearInterval interval
       else
-        ask question, user
+        ask user
     , 1000
 
-  ask = (question, username) ->
+  ask =  (username) ->
     console.log("Asking #{username}...")
-    robot.send({room: username}, question)
+    robot.send({room: username}, question())
 
   extractData = (req) ->
     if req.body.payload?
@@ -27,13 +33,27 @@ module.exports = (robot) ->
     else
       req.body
 
+  question = ->
+    robot.brain.get 'question'
+
+  users = ->
+    robot.brain.get "users"
+
+  surveyId = ->
+    robot.brain.get "surveyId"
+
   robot.hear /[1-9]|10/, (res) ->
     user = res.message.room
-    return null if users.length == 0
+    return null if users().length == 0
     if hasNotBeenContacted user
-      console.log "Heard back from #{user}"
+      crossNameOff user
       res.send "Thank you for your input!"
       saveResponse res.message.rawText
+
+  crossNameOff = (user)->
+    index = users().indexOf user
+    newUsers = users().splice(index, 1)
+    robot.brain.set "users", newUsers
 
   saveResponse = (text) ->
     console.log "Saving response..."
@@ -41,20 +61,20 @@ module.exports = (robot) ->
     recordSurveyResponse surveyResponse
 
   hasNotBeenContacted = (user) ->
-    users.indexOf(user) > -1
+    users().indexOf(user) > -1
 
   buildResponse = (response) ->
     JSON.stringify
       bashir:
         auth:
-          token: "frontier_medicine-aj-dr"
+          token: ehAuthToken
 
         info:
-          survey_id: null
+          survey_id: surveyId()
           response: response
 
   recordSurveyResponse = (surveyResponse) ->
     robot
-      .http("http://localhost:3000/api/v1/survey_responses")
+      .http(surveyReceptorUrl)
       .header('Content-Type', 'application/json')
       .post(surveyResponse) (err, res, body) ->
